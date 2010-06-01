@@ -24,14 +24,13 @@ public class Sprite {
 		width = bitmap.getWidth() / cols;
 	}
 	
-	public void draw(Canvas canvas, Screen screen, int facing, int state) {
-		Point center = screen.getViewAt();
+	public void draw(Canvas canvas, Screen screen, Point position, int facing, int state) {
 		int x0 = state * width;
 		int y0 = facing * height;
 		Rect src = new Rect(x0, y0, x0+width-1, y0+width-1);
-		x0 = center.x - width/2;
-		y0 = center.y - (height-1);
-		Rect dest = new Rect(x0, y0, x0+width-1, y0+height-1); 
+
+		Point origin = screen.toScreen(new Point(position)).offset(-width/2, -(height-1));
+		Rect dest = new Rect(origin.x, origin.y, origin.x+width-1, origin.y+height-1); 
 		canvas.drawBitmap(bitmap, src, dest, null);
 	}
 	

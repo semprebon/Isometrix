@@ -32,9 +32,19 @@ public class TestScreen extends TestCase {
 		screen.setTiler(mockTiler);
 		game = new Game();
 		screen.setGame(game);
-		screen.setTileSize(game.getTileSize());
+		screen.setTileSize(60);
 	}
 
+	public void testScreenOffsetShouldReturnZeroForViewAtZero() {
+		screen.viewAt(new Point(0, 0));
+		assertEquals(new Point(0,0), screen.screenOffset());
+	}
+	
+	public void testScreenOffsetShouldReturnAmoutShiftedFromZero() {
+		screen.viewAt(new Point(32, 0));
+		assertEquals(new Point(60,-30), screen.screenOffset());
+	}
+	
 	public void testToScreenShouldReturnCenterOfScreenForViewedPoint() {
 		screen.viewAt(new Point(0, 0));
 		assertEquals(new Point(50,50), screen.toScreen(new Point(0,0)));
@@ -42,23 +52,23 @@ public class TestScreen extends TestCase {
 	
 	public void testToScreenShouldReturnCorrectScreenPointForGamePoint() {
 		screen.viewAt(new Point(0, 0));
-		assertEquals(new Point(68,51), screen.toScreen(new Point(8,10)));
+		assertEquals(new Point(83,51), screen.toScreen(new Point(8,10)));
 		screen.viewAt(new Point(8, 10));
-		assertEquals(new Point(40,51), screen.toScreen(new Point(2,6)));
+		assertEquals(new Point(32,52), screen.toScreen(new Point(2,6)));
 	}
 	
 	public void testToGameShouldReturnCorrectGamePointForScreenPoint() {
 		screen.viewAt(new Point(8, 10));
-		assertEquals(new Point(2,6), screen.toGame(new Point(40,51)));
+		assertEquals(new Point(3,7), screen.toGame(new Point(32,52)));
 	}
 
 	public void testDrawTilesShouldDrawTileAtOrigin() {
 		screen.viewAt(new Point(0,0));
-		screen.drawTiles();
+		screen.drawTiles(0, 0, 100, 100);
 		assertTrue(tileCalls.size() > 0);
-		int size = game.getTileSize();
+		int size = screen.getTileSize();
 		assertEquals(game.tileAt(new Point(0, 0)), (int) tileCalls.get(new Point(50, 50-size/2)));
-		assertEquals(game.tileAt(new Point(-size, 0)), (int) tileCalls.get(new Point(50-size, 50)));
+		assertEquals(game.tileAt(new Point(-size*32/60, 0)), (int) tileCalls.get(new Point(50-size, 50)));
 	}
 	
 	public static Test suite() {

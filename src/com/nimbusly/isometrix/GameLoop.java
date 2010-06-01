@@ -1,10 +1,15 @@
 package com.nimbusly.isometrix;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Debug;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -14,10 +19,16 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback {
 	private SurfaceHolder surfaceHolder;
 	private static final String TAG = "GameLoop";
 	private Game game;
-	private BitmapDrawable greyTile, greenTile;
+	BitmapDrawable greyTile, greenTile;
 	private Sprite character;
 	private Screen screen;
 	private CanvasTiler tiler;
+	private Point lastScreenOffset = null;
+	private Context context;
+	private Bitmap background;
+	
+	private long loopStartTime;
+	private long frames;
 
 	private class CanvasTiler implements Screen.Tiler {
 		public Canvas canvas;
@@ -32,6 +43,7 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback {
 	
 	public GameLoop(Context context, Game ground, SurfaceHolder surfaceHolder, GameController controller) {
 		super();
+		this.context = context;
 		this.surfaceHolder = surfaceHolder;
 		surfaceHolder.addCallback(this);
 		screen = new Screen(100, 100);
@@ -43,11 +55,18 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback {
 		tiler = new CanvasTiler();
 		screen.setTiler(tiler);
 		screen.setGame(ground);
+		screen.setTileSize(60);
 	}
 
 	@Override
 	public void run() {
 		Log.i(TAG, "Thread started");
+		loopStartTime = System.currentTimeMillis();
+		frames = 0;
+		String frameRate = "";
+        Paint textPaint = new Paint();
+        textPaint.setColor(0xffffff);
+        //Debug.startMethodTracing("GameThread");
 		while (isRunning) {
             Canvas canvas = null;
             long now = System.currentTimeMillis();
@@ -55,26 +74,62 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback {
             try {
                 canvas = surfaceHolder.lockCanvas(null);
                 synchronized (surfaceHolder) {
-                    updateVideo(canvas);
+                   updateVideo(canvas);
                 }
             } finally {
                 if (canvas != null) {
                     surfaceHolder.unlockCanvasAndPost(canvas);
                 }
             }
+            ++frames;
+            if (frames % 100 == 0) {
+            	frameRate = Long.toString(getFrameRate());
+        		long elapsed = System.currentTimeMillis() - loopStartTime;
+        		//Log.i(TAG, "Frame rate:" + frameRate + "; " + elapsed/frames + " ms/frame");
+            }
         }
-			
+		//Debug.stopMethodTracing();
 	}
 	
-	private void updateVideo(Canvas canvas) {
+	protected void updateVideo(Canvas canvas) {
 		synchronized(game) {
-			screen.viewAt(new Point(game.getXPosition() * 20, game.getYPosition() * 20));
+			screen.viewAt(new Point(game.getPosition()));
 		}
 		canvas.clipRect(0, 0, screen.getWidth()-1, screen.getHeight()-1);
 		canvas.drawColor(0x000000, PorterDuff.Mode.SRC);
 		tiler.canvas = canvas;
-		screen.drawTiles();
-		character.draw(canvas, screen, game.getFacing(), game.getWalkState());
+		screen.drawTiles(0, 0, screen.getWidth()-1, screen.getHeight()-1);
+		character.draw(canvas, screen, game.getPosition(), game.getFacing(), game.getWalkState());
+	}
+	
+	protected void drawBackground(Canvas canvas) {
+		if (lastScreenOffset != null) {
+			screen.drawTiles(0, 0, screen.getWidth()-1, screen.getHeight()-1);
+			lastScreenOffset = screen.screenOffset();
+			return;
+		}
+		Point currentScreenOffset = screen.screenOffset();
+		Point offset = lastScreenOffset.offset(-currentScreenOffset.x, -currentScreenOffset.y);
+		
+		Rect current = new Rect(0, 0, screen.getWidth() - 1, screen.getHeight() - 1);
+		Rect previous = new Rect(current);
+		previous.offset(offset.x, offset.y);
+		if (previous.intersect(current)) {
+			current.intersect(previous);
+			// copy and just draw missing areas;
+		} else {
+			screen.drawTiles(0, 0, screen.getWidth()-1, screen.getHeight()-1);
+			lastScreenOffset = currentScreenOffset;
+			return;
+		}
+	}
+	
+	/**
+	 * Timing instrumentation
+	 */
+	public long getFrameRate() {
+		long elapsed = System.currentTimeMillis() - loopStartTime;
+		return frames * 1000 / elapsed;
 	}
 	
 	/**

@@ -3,16 +3,18 @@ package com.nimbusly.isometrix;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.SurfaceView;
+import android.view.Window;
 
 public class Isometrix extends Activity {
 	
-	private GameLoop gameLoop;
+	public GameLoop gameLoop;
 	private SurfaceView gameView;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         Game ground = new Game();
         setContentView(R.layout.game);
         gameView = (SurfaceView) findViewById(R.id.gameView);

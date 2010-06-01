@@ -13,18 +13,18 @@ public class Game {
 	private long startTime;
 	private int walkState;
 	private int facing;
-	private static final int CELL_SIZE = 80;
+	private static final int TILE_SIZE = 32;
 	
 	private static final int[][] DIRECTION_INDEX = new int[][] {
-		new int[] { 1, 2, 3 }, 
-		new int[] { 0, 0, 4 }, 
-		new int[] { 7, 6, 5 }
+		new int[] { 6, 7, 0 }, 
+		new int[] { 5, 0, 1 }, 
+		new int[] { 4, 3, 2 }
 	};
-	private long speed = 100;
+	private long speed = 400; // ms per tile
 	private long time;
 	
 	public void move(int dx, int dy) {
-		Log.d(TAG, "Moving " + dx + "," + dy);
+		//Log.d(TAG, "Moving " + dx + "," + dy);
 		synchronized(this) {
 			facing = directionIndex(dx, dy);
 			position.x = (position.x + dx) % width;
@@ -38,10 +38,15 @@ public class Game {
 		// compute movement
 		if (destination != null && !position.equals(destination)) {
 			double distance = origin.distanceTo(destination);
-			long dt = time - startTime;
-			int dx = (int) Math.round(dt * speed * (destination.x - origin.x) / distance);
-			int dy = (int) Math.round(dt * speed * (destination.y - origin.y) / distance);
-			position.set(origin.x + dx, origin.y + dy);
+			long step = (time - startTime) * TILE_SIZE / speed;
+			if (step < distance) {
+				int dx = (int) Math.round(step * (destination.x - origin.x) / distance);
+				int dy = (int) Math.round(step * (destination.y - origin.y) / distance);
+				facing = directionIndex(dx, dy);
+				position.set(origin.x + dx, origin.y + dy);
+			} else {
+				position.set(destination.x, destination.y);
+			}
 		}
 	}
 	
@@ -64,13 +69,13 @@ public class Game {
 	public int getFacing() { return facing; }
 	
 	public int tileAt(Point p) {
-		int col = p.x / CELL_SIZE;
-		int row = p.y / CELL_SIZE;
+		int col = p.x / TILE_SIZE;
+		int row = p.y / TILE_SIZE;
 		return (col + row) % 2;
 	}
 	
 	public int getTileSize() {
-		return CELL_SIZE;
+		return TILE_SIZE;
 	}
 	
 	public void setPosition(Point point) {
@@ -84,7 +89,7 @@ public class Game {
 	}
 	
 	private int directionIndex(int dx, int dy) {
-		return DIRECTION_INDEX[dx+1][dy+1];
+		return DIRECTION_INDEX[IntegerMath.signum(dx)+1][IntegerMath.signum(dy)+1];
 	}
 
 	public void setSpeed(long speed) {

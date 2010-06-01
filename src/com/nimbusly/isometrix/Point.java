@@ -3,6 +3,9 @@ package com.nimbusly.isometrix;
 public class Point {
 	public int x, y;
 	
+	public Point() {
+	}
+	
 	public Point(int x, int y) {
 		set(x, y);
 	}

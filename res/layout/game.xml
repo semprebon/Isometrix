@@ -3,5 +3,6 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/gameView">
+    android:id="@+id/gameView"
+    android:theme="@android:style/Theme.NoTitleBar">
 </SurfaceView>
