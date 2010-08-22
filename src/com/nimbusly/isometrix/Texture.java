@@ -83,6 +83,17 @@ public class Texture {
 	}
 	
     private static int[] textureNameWorkspace = new int[1];
+    
+    private int roundToTextureSize(int x) {
+    	int nextSize;
+    	for (int size = 1; size < 4096; size = nextSize) {
+    		nextSize = size * size;
+    		if (x > size && x <= nextSize) {
+    			return nextSize;
+    		}
+    	}
+    	return 0;
+    }
 
     /**
 	 * Create a GL texture from a bitmap

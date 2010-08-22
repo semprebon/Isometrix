@@ -31,7 +31,7 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback, GLSurfac
 	private SurfaceHolder surfaceHolder;
 	private static final String TAG = "GameLoop";
 	private Game game;
-	BitmapDrawable greyTile, greenTile;
+	BitmapDrawable[] tiles;
 	int greyTextureName, greenTextureName;
 	private Sprite character;
 	private Screen screen;
@@ -47,7 +47,7 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback, GLSurfac
 		public Canvas canvas;
 
 		public void drawTile(Point origin, int width, int height, int tileIndex) {
-			Drawable tile = tileIndex == 0 ? greenTile : greyTile;
+			Drawable tile = tiles[tileIndex];
 			tile.setBounds(origin.x, origin.y, origin.x + width - 1, origin.y + height - 1);
 			tile.draw(canvas);
 		}
@@ -74,8 +74,8 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback, GLSurfac
 		screen = new Screen(100, 100);
 		this.game = ground;
 		controller.setScreen(screen);
-		greyTile = (BitmapDrawable) context.getResources().getDrawable(R.drawable.grey_tile);
-		greenTile = (BitmapDrawable) context.getResources().getDrawable(R.drawable.green_tile);
+//		greyTile = (BitmapDrawable) context.getResources().getDrawable(R.drawable.grey_tile);
+//		greenTile = (BitmapDrawable) context.getResources().getDrawable(R.drawable.green_tile);
 		//character = new Sprite(context, R.drawable.walking, 12, 8);
 		tiler = new GlTiler();
 		screen.setTiler(tiler);
@@ -218,8 +218,8 @@ public class GameLoop extends Thread implements SurfaceHolder.Callback, GLSurfac
 
         //load textures
         sBitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
-        greyTextureName = loadBitmap(context, gl, R.drawable.grey_tile);
-        greenTextureName = loadBitmap(context, gl, R.drawable.green_tile);
+//        greyTextureName = loadBitmap(context, gl, R.drawable.grey_tile);
+//        greenTextureName = loadBitmap(context, gl, R.drawable.green_tile);
 	}    
 	private static BitmapFactory.Options sBitmapOptions = new BitmapFactory.Options();
 	

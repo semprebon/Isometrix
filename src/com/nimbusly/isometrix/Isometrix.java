@@ -8,7 +8,6 @@ import android.view.Window;
 
 public class Isometrix extends Activity {
 	
-	public GameLoop gameLoop;
 	private GLSurfaceView gameView;
 	
     /** Called when the activity is first created. */

@@ -60,12 +60,12 @@ public class Background {
 		this.viewHeight = height;
 	}
 	
-	public Background(Context context, GL10 gl, int width, int height) {
+	public Background(Context context, GL10 gl, int width, int height, int[] tileResources) {
 		this(width, height);
 		
-		Bitmap[] tiles = new Bitmap[] {
-			Texture.loadBitmapFromResource(context, R.drawable.green_tile),
-			Texture.loadBitmapFromResource(context, R.drawable.grey_tile),
+		Bitmap[] tiles = new Bitmap[tileResources.length];
+		for (int i = 0; i < tileResources.length; ++i) {
+			tiles[i] = Texture.loadBitmapFromResource(context, tileResources[i]);
 		};
 		tileHeight = tiles[0].getHeight();
 		tileWidth = tiles[0].getWidth();

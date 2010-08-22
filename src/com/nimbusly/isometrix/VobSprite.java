@@ -1,5 +1,7 @@
 package com.nimbusly.isometrix;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -10,17 +12,11 @@ import javax.microedition.khronos.opengles.GL11Ext;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.BitmapFactory;
+import android.opengl.GLUtils;
 
-/**
- * A sprite represents an animated bitmap that can be drawn on a screen.
- * 
- * @author semprebon
- *
- */
-public class Sprite {
+public class VobSprite {
+	
 	Bitmap bitmap;
 	public int height, width;
 	int rows, cols;
@@ -32,8 +28,8 @@ public class Sprite {
 	
 	private FloatBuffer vertexBuffer;
 	private FloatBuffer textureBuffer;
-	/** The buffer holding the indices */
 	private ByteBuffer  indexBuffer;
+
 	private static float vertices[] = {
 		0.0f, 0.0f, 0.0f,
     	1.0f, 0.0f, 0.0f,
@@ -71,17 +67,22 @@ public class Sprite {
      * @param cols number of columns of sub-images
      * @param rows number of rows of sub-images
      */
-	public Sprite(Context context, GL10 gl, int id, int cols, int rows) {
+	public VobSprite(Context context, GL10 gl, int id, int cols, int rows) {
 		texture = new Texture(context, gl, id);
 		width = texture.bitmapWidth / cols;
 		height = texture.bitmapHeight / rows;
+		vertexBuffer = loadBuffer(vertices);
+		textureBuffer = loadBuffer(textureVertices);
+		indexBuffer = ByteBuffer.allocateDirect(indices.length);
+		indexBuffer.put(indices);
+		indexBuffer.position(0);
 	}
 
 	/**
 	 * Draw using textdra
 	 * @param gl
 	 */
-	public void draw(GL10 gl) {
+	public void drawX(GL10 gl) {
 		int x0 = state * width;
 		int y0 = facing * height;
 		crop[0] = x0; crop[1] = y0; crop[2] = width; crop[3] = height;
@@ -90,11 +91,19 @@ public class Sprite {
 		((GL11Ext) gl).glDrawTexiOES(x, y, 1, width, height);
 	}
 	
+	public void setPosition(int x, int y) {
+		vertexBuffer.put(x);
+		vertexBuffer.put(y);
+		vertexBuffer.put(x + width);
+		vertexBuffer.put(y + height);
+		vertexBuffer.position(0);
+	}
 	/**
 	 * Draws using VBO
 	 * @param gl
 	 */
-	public void drawX(GL10 gl) {
+	public void draw(GL10 gl) {
+		setPosition(x, y);
         gl.glBindTexture(GL10.GL_TEXTURE_2D, texture.textureName);
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
@@ -123,7 +132,5 @@ public class Sprite {
 		gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
 		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);
 	}
-
-
 
 }
