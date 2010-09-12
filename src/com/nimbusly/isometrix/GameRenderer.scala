@@ -88,11 +88,11 @@ class GameRenderer(context: Context) extends Renderer {
 		}
 		screenWidth = width;
 		screenHeight = height;
-
+		Log.d(TAG, "Setting window size to " + width + "x" + height)
 		gl.glViewport(0, 0, width, height); 	//Reset The Current Viewport
         gl.glMatrixMode(GL10.GL_PROJECTION); 	//Select The Projection Matrix
-		gl.glOrthof(0.0f, width, 0.0f, height, 0.0f, 1.0f);
-		gl.glLoadIdentity(); 					//Reset The Projection Matrix
+		gl.glOrthof(0.0f, width, 0.0f, height, 0.001f, 100.0f);
+		//gl.glLoadIdentity(); 					//Reset The Projection Matrix
 
 		gl.glMatrixMode(GL10.GL_MODELVIEW); 	//Select The Modelview Matrix
 		gl.glLoadIdentity(); 					//Reset The Modelview Matrix

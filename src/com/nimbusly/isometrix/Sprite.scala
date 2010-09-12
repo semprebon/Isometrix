@@ -45,9 +45,6 @@ class Sprite(context : Context, gl : GL10, id : Int, val width : Int, val height
 	var facing = 0
 	var state = 0
 	
-	//indexBuffer.put(indices)
-	//indexBuffer.position(0)
-
     // This is an array of all the vertices in the object. In the case of the rectangular
 	// sprite, there are four. These are represented in normalized format (1.0 x 1.0 square) which
 	// then needs to be translated and scaled before being rendered.
@@ -60,12 +57,15 @@ class Sprite(context : Context, gl : GL10, id : Int, val width : Int, val height
 	
 	// This defines coodinates in texture space (0.0 - 1.0) that correspond to the
 	// coordinates of the sprite
+	val textureWidth = width * 1.0f / texture.bitmapWidth
+	val textureHeight = height * 1.0f / texture.bitmapHeight
+	
     private val textureVertices = Array(    		
     		//Mapping coordinates for the vertices
+    		0.0f, textureHeight,
+    		textureWidth, textureHeight,
     		0.0f, 0.0f,
-    		0.0f, 1.0f,
-    		1.0f, 0.0f,
-    		1.0f, 1.0f)
+    		textureWidth, 0.0f)
 	private var textureBuffer :  FloatBuffer = loadBuffer(textureVertices)
 
 	// The index buffer basically defines the two triangle areas that make up the sprite
@@ -103,11 +103,9 @@ class Sprite(context : Context, gl : GL10, id : Int, val width : Int, val height
 	 * @param gl
 	 */
 	def drawDirect(gl : GL10) {
-		Log.d(TAG, "Drawing at " + x + "," + y + " at size " + width + "x" + height)
 		val x0 = state * width
 		val y0 = facing * height
-		Log.d(TAG, "Texture cropped at " + x0 + "," + y0)
-		crop(0) = x0; crop(1) = y0; crop(2) = width; crop(3) = height;
+		crop(0) = x0; crop(1) = y0+height; crop(2) = width; crop(3) = -height;
         gl.glBindTexture(GL10.GL_TEXTURE_2D, texture.textureName)
 		gl.asInstanceOf[GL11].glTexParameteriv(GL10.GL_TEXTURE_2D, GL11Ext.GL_TEXTURE_CROP_RECT_OES, crop, 0)
 		gl.asInstanceOf[GL11Ext].glDrawTexiOES(x, y, 1, width, height)
@@ -126,26 +124,31 @@ class Sprite(context : Context, gl : GL10, id : Int, val width : Int, val height
 	 * @param gl
 	 */
 	def drawAsVob(gl : GL10) {
-		Log.d(TAG, "Drawing VOB at " + x + "," + y + " at size " + width + "x" + height)
 		// translate to position before drawing
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
+        //gl.glPushMatrix();
+		//gl.glMatrixMode(GL10.GL_PROJECTION); 	//Select The Projection Matrix
+		//gl.glOrthof(-1.0f, 1.0f, -1.0f, 1.0f, 0.01f, 1000.0f);
+
+        gl.glLoadIdentity()
+
         gl.glTranslatef(x, y, 0.0F)
-        gl.glScalef
-		//setPosition(x, y)
+        gl.glScalef(width, height, 1.0f)
+        //setPosition(x, y)
         // set gl state
         gl.glBindTexture(GL10.GL_TEXTURE_2D, texture.textureName)
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY)
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY)
 
 		//Set the face rotation
-		gl.glFrontFace(GL10.GL_CCW)
+		//gl.glFrontFace(GL10.GL_CCW)
 		
 		//Enable the vertex and texture state
+		//gl.glColor4f(1.0f, 0.5f, 0.5f, 1.0f)
 		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer)
 		gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer)
 		
 		//Draw the vertices as triangles, based on the Index Buffer information
+		//gl.glDrawArrays(GL10.GL_TRIANGLES, 0, testVertices.length)
 		gl.glDrawElements(GL10.GL_TRIANGLES, indices.length, GL10.GL_UNSIGNED_BYTE, indexBuffer)
 		//gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
 		
@@ -155,9 +158,8 @@ class Sprite(context : Context, gl : GL10, id : Int, val width : Int, val height
 
 		//Set the face rotation
 		//gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3)
-		gl.glDisableClientState(GL10.GL_VERTEX_ARRAY)
-
-        gl.glPopMatrix();
+	
+        //gl.glPopMatrix();
 
 	}
 	

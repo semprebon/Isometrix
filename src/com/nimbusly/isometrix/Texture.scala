@@ -1,5 +1,6 @@
 package com.nimbusly.isometrix
 
+import android.graphics.Matrix
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,6 +17,8 @@ object TextureObj {
 
 	/**
 	 * Create a Bitmap object from a png image resource
+	 *
+	 * Note: although simple, this results in bitmaps that are inverted
 	 * 
 	 * @param context Application context
 	 * @param id resource id of png image
@@ -30,7 +33,7 @@ object TextureObj {
 		} finally {
 			//Always clear and close
 			try {
-				is.close()
+			is.close()
 			} catch {
 				case e:IOException => Log.e(TAG, "Unable to load texture", e) 
 			}
