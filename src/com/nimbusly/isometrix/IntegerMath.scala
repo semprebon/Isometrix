@@ -15,4 +15,7 @@ object IntegerMath {
 		if (value >= 0) (value + divisor - 1) / divisor else -floor(-value, divisor)
 
 	def signum(value : Int) : Int = if (value > 0) +1 else if (value == 0) 0 else -1
+	
+	def divmod(x: Int, y: Int): (Int, Int) = (x / y, x % y)
+	
 }
